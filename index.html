@@ -72,8 +72,8 @@ textarea{min-height:80px}input:focus,textarea:focus{outline:3px solid var(--main
    1) 여기에 Supabase 프로젝트 정보를 넣으세요.
    Supabase Dashboard → Project Settings → API
    ========================================================= */
-const SUPABASE_URL = "여기에_프로젝트_URL";
-const SUPABASE_KEY = "여기에_Publishable_또는_anon_Key";
+const SUPABASE_URL = "https://hurrpvlcjzbbaiykwjsv.supabase.co";
+const SUPABASE_KEY = "sb_publishable_TjvGelSlU0xhy133hL1ZUQ_mr6xSYaI";
 
 const configured = SUPABASE_URL.startsWith("https://") && !SUPABASE_URL.includes("여기에_");
 const sb = configured ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
