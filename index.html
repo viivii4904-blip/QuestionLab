@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>🧐 우리 반 질문제작소</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f2ee;--card:#fff;--ink:#2f3441;--main:#4b5a9a;--btn:#4b5a9a;--ok:#3d8b6a;--bad:#c9534b;--chip:#e6e8f4;--line:#d9d6cf}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;letter-spacing:-.01em;font-size:18px;line-height:1.5}
+main{max-width:1000px;margin:0 auto;padding:16px}h1{text-align:center;margin:8px 0;color:var(--main)}h2{margin:20px 0 6px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:14px;margin:12px 0}
+input,textarea{width:100%;font:inherit;padding:10px;border:2px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);margin:4px 0 8px}
+textarea{min-height:80px}input:focus,textarea:focus{outline:3px solid var(--main);border-color:var(--main)}
+.btn{background:var(--btn);color:#fff;border:0;border-radius:999px;padding:8px 18px;font:inherit;font-size:16px;font-weight:600;cursor:pointer;margin-right:6px}.btn.white{background:#fff;color:#2f3441;border:1px solid var(--line)}.btn.sm{padding:2px 12px;font-size:13px}.btn:disabled{opacity:.55;cursor:default}.btn.ok{background:var(--ok)}.btn.no{background:var(--bad)}
+.chips button{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:2px 10px;margin:2px;font:inherit;font-size:13px;cursor:pointer;color:var(--ink)}.chips button.on{background:var(--btn);color:#fff;font-weight:bold}
+.meta{font-size:14px;opacity:.75}.note{border-radius:10px;padding:8px 12px;font-size:15px;margin:8px 0;background:#e4e8f6;color:#2f3a6b}.note.warn{background:#fbe6e3;color:#7a2b25}.hide{display:none}
+.t-fact{background:#c1ddff!important;border-color:#4a90e2}.t-heart{background:#fff0a4!important;border-color:#e0b400}.t-why{background:#c1efce!important;border-color:#2e9e5b}.t-exp{background:#ffc9e2!important;border-color:#e0679a}
+.tag{display:inline-block;border-radius:10px;padding:1px 10px;font-size:13px;font-weight:bold;background:rgba(255,255,255,.7)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}.pit{position:relative;aspect-ratio:1/1;display:flex;flex-direction:column;gap:4px;padding:14px;background:#f1f1f1;color:#2b2b2b;border-radius:3px 3px 3px 22px;box-shadow:2px 4px 10px rgba(0,0,0,.3);cursor:pointer;overflow:hidden}.pit:nth-child(3n+1){transform:rotate(-1.2deg)}.pit:nth-child(3n+2){transform:rotate(.8deg)}.pq{flex:1;overflow:auto;font-weight:bold;font-size:18px;word-break:break-word}.pit .x{position:absolute;top:4px;right:4px;border:0;background:var(--bad);color:#fff;border-radius:50%;width:26px;height:26px;cursor:pointer}
+#modal,#login{position:fixed;inset:0;background:rgba(0,0,0,.55);overflow:auto;padding:16px;z-index:20;display:flex;align-items:center;justify-content:center}.sheet,.loginbox{max-width:540px;width:100%;padding:18px;border-radius:4px 4px 4px 28px;box-shadow:3px 6px 16px rgba(0,0,0,.4);background:#f1f1f1;color:#2b2b2b}.sheet textarea{background:#fff;color:#2b2b2b}.q{font-size:21px;font-weight:bold;margin:6px 0;word-break:break-word}.ans{border-left:4px solid var(--main);padding:6px 10px;margin:8px 0;background:rgba(255,255,255,.65);border-radius:6px}.gold{box-shadow:inset 0 0 0 5px #e6b422,0 0 16px 4px rgba(255,196,0,.85)!important}.ans.gold{border:3px solid #e6b422;box-shadow:none!important;background:#fff8d6}
+.types{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.types button{border:3px solid transparent;border-radius:999px;padding:8px;font:inherit;font-size:15px;cursor:pointer;color:#2b2b2b}.types button.sel{border-color:#2f3441;outline:1px solid #2f3441}
+.fcard{padding:8px 12px;border-radius:12px}.frow{display:flex;gap:8px;align-items:flex-start;padding:2px 0}.fl{font-size:13px;font-weight:600;opacity:.75;min-width:52px;padding-top:4px}
+.topbar{display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap}.status{text-align:center;font-size:13px;opacity:.75;margin:5px}
+</style>
+</head>
+<body>
+<main>
+<div class="topbar">
+<button class="btn white sm" id="teacherBtn">👩‍🏫 교사 모드</button>
+<button class="btn white sm hide" id="logoutBtn">로그아웃</button>
+</div>
+<h1>🧐 우리 반 질문제작소</h1>
+<div id="note" class="note hide"></div>
+<div id="status" class="status">연결 준비 중…</div>
+
+<h2>✏️ 질문 만들기</h2>
+<div class="card">
+내 이름 <input id="me" maxlength="10" placeholder="이름을 써요 (예: 홍길동)">
+<div class="meta">올라갈 때 이름: <b id="prev">-</b> (가운데가 * 로 바뀌어요)</div><br>
+📖 읽은 글/책 제목 <input id="src" maxlength="40" autocomplete="off">
+도움말(눌러 보세요)<div class="chips" id="chips"></div>
+<div class="meta">🤖 질문 유형과 색깔은 질문을 올릴 때 자동으로 정해져요.</div>
+<textarea id="qtext" maxlength="200" placeholder="읽고 궁금한 점을 질문으로 써 봐요."></textarea>
+<div id="qerr" class="note warn hide"></div>
+<div style="text-align:center"><button class="btn" id="post">질문 올리기</button></div>
+</div>
+
+<div id="board">
+<h2>📌 질문 모아보기 <span class="meta">(질문을 누르면 답변을 보거나 쓸 수 있어요)</span> <button class="btn white sm" id="shot">📷 화면 저장</button></h2>
+<div class="card fcard">
+<div class="frow"><span class="fl">🗂 유형</span><div class="chips" id="tfil"></div></div>
+<div class="frow"><span class="fl">📖 제목</span><div class="chips" id="bfil"></div></div>
+</div>
+<div id="list" class="grid"></div>
+</div>
+</main>
+
+<div id="modal" class="hide"><div id="sheetwrap"></div></div>
+<div id="login" class="hide"><div class="loginbox">
+<h2 style="margin-top:0">👩‍🏫 교사 로그인</h2>
+<p class="meta">Supabase에서 만든 교사용 이메일과 비밀번호를 입력하세요.</p>
+<input id="email" type="email" placeholder="교사 이메일">
+<input id="pw" type="password" placeholder="비밀번호">
+<div id="loginErr" class="note warn hide"></div>
+<button class="btn" id="loginGo">로그인</button>
+<button class="btn white" id="loginClose">취소</button>
+</div></div>
+
+<script>
+/* =========================================================
+   1) 여기에 Supabase 프로젝트 정보를 넣으세요.
+   Supabase Dashboard → Project Settings → API
+   ========================================================= */
+const SUPABASE_URL = "여기에_프로젝트_URL";
+const SUPABASE_KEY = "여기에_Publishable_또는_anon_Key";
+
+const configured = SUPABASE_URL.startsWith("https://") && !SUPABASE_URL.includes("여기에_");
+const sb = configured ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+const $=id=>document.getElementById(id);
+const TYPES={fact:['🔵 사실 질문'],heart:['🟡 마음 질문'],why:['🟢 이유 질문'],exp:['🌸 경험다짐 질문']};
+let qs=[],as=[],pqs=[],pas=[],teacher=false,openId=null,ftype='',fbook='';
+
+function mask(n){n=n.trim();if(!n)return'이름없음';const a=[...n];if(a.length<=2)return a[0]+'*';return a[0]+'*'.repeat(a.length-2)+a[a.length-1]}
+function note(t,w=false){const n=$('note');n.textContent=t;n.className='note'+(w?' warn':'')}
+function warn(t){note(t,true);$('note').scrollIntoView({behavior:'smooth',block:'center'})}
+function key(t){return(t||'').replace(/\s+/g,'').toLowerCase()}
+function normSrc(v){return v.trim().replace(/\s+/g,' ')}
+function tc(t){return TYPES[t]?' t-'+t:''}
+function typeLabel(t){return TYPES[t]?TYPES[t][0]:'유형 없음'}
+
+function classify(t){
+  const s=t.replace(/\s+/g,'');
+  if(/경험|해본|느꼈|다짐|실천|내가.*한다면|나라면/.test(s))return'exp';
+  if(/왜|이유|까닭|어째서|때문/.test(s))return'why';
+  if(/마음|기분|생각|어땠|느낌/.test(s))return'heart';
+  return'fact';
+}
+
+[['왜',0],['만약',0],['어떻게',0],['당신이라면',0],['마음',2],['기분',2],['경험',2],['무엇일까',1],['해야할까',1]].forEach(([w,m])=>{
+ const b=document.createElement('button');b.textContent=m==1?'…'+w:m==2?w:w+'…';
+ b.onclick=()=>{const t=$('qtext');if(m==2){const p=t.selectionStart??t.value.length,e=t.selectionEnd??p;t.value=t.value.slice(0,p)+w+t.value.slice(e);t.focus();t.setSelectionRange(p+w.length,p+w.length)}else{t.value=m?t.value.replace(/\s+$/,'')+' '+w:w+' '+t.value;t.focus()}};$('chips').appendChild(b);
+});
+try{$('me').value=localStorage.getItem('qlab-me')||''}catch(e){}
+$('me').oninput=()=>{$('prev').textContent=mask($('me').value);try{localStorage.setItem('qlab-me',$('me').value)}catch(e){}};
+$('prev').textContent=mask($('me').value);
+
+async function load(){
+ if(!sb){$('status').textContent='⚠️ Supabase 설정이 필요해요.';render();return}
+ $('status').textContent='연결 중…';
+ const jobs=[
+   sb.from('questions').select('*').order('created_at',{ascending:true}),
+   sb.from('answers').select('*').order('created_at',{ascending:true})
+ ];
+ if(teacher){
+   jobs.push(sb.from('pending_questions').select('*').order('created_at',{ascending:true}));
+   jobs.push(sb.from('pending_answers').select('*').order('created_at',{ascending:true}));
+ }
+ const r=await Promise.all(jobs);
+ if(r[0].error||r[1].error){$('status').textContent='⚠️ DB 연결/권한 설정을 확인하세요.';console.error(r[0].error,r[1].error);return}
+ qs=r[0].data||[];as=r[1].data||[];
+ pqs=teacher?(r[2].data||[]):[];pas=teacher?(r[3].data||[]):[];
+ $('status').textContent='🟢 온라인 · 모두 같은 질문판을 보고 있어요';
+ render();
+}
+async function postQuestion(){
+ const name=$('me').value.trim(), text=$('qtext').value.trim(), src=normSrc($('src').value), type=classify(text);
+ if(!name)return warn('이름을 먼저 써 주세요!');
+ if(text.length<3)return warn('질문을 조금 더 써 주세요!');
+ if(!/[?？]\s*$/.test(text)){const e=$('qerr');e.textContent='?를 붙여야 질문이에요.';e.classList.remove('hide');return}
+ if(!sb)return warn('아직 DB 설정이 끝나지 않았어요.');
+ const b=$('post');b.disabled=true;b.textContent='올리는 중…';
+ const {error}=await sb.from('pending_questions').insert({text,src,author:mask(name),type});
+ if(error){console.error(error);warn('저장하지 못했어요. Supabase 설정을 확인해 주세요.')}
+ else{$('qtext').value='';note('질문을 올렸어요! 선생님이 확인하면 모두에게 공개돼요. ✅')}
+ b.disabled=false;b.textContent='질문 올리기';
+}
+$('post').onclick=postQuestion;
+
+function buildFilters(all){
+ const t=$('tfil');t.textContent='';
+ const mk=(label,cls,on,fn)=>{const b=document.createElement('button');b.textContent=label;b.className=cls+(on?' on':'');b.onclick=fn;return b};
+ t.appendChild(mk('전체 ('+all.length+')','',!ftype,()=>{ftype='';render()}));
+ Object.keys(TYPES).forEach(k=>{const n=all.filter(q=>q.type==k).length;t.appendChild(mk(TYPES[k][0]+' ('+n+')','t-'+k,ftype==k,()=>{ftype=ftype==k?'':k;render()}))});
+ const cnt={};all.forEach(q=>{const k=key(q.src);if(k)cnt[k]=(cnt[k]||0)+1});
+ const b=$('bfil');b.textContent='';b.appendChild(mk('전체','',!fbook,()=>{fbook='';render()}));
+ Object.keys(cnt).sort().forEach(k=>b.appendChild(mk('📖 '+(all.find(q=>key(q.src)==k)?.src||k)+' ('+cnt[k]+')','',fbook==k,()=>{fbook=fbook==k?'':k;render()})));
+}
+
+function render(){
+ const box=$('list');box.textContent='';
+ if(teacher){
+   const pending=document.createElement('div');pending.className='card';
+   const h=document.createElement('h2');h.textContent='⏳ 승인 대기';
+   pending.appendChild(h);
+   if(!pqs.length&&!pas.length)pending.appendChild(Object.assign(document.createElement('div'),{className:'meta',textContent:'승인 대기 중인 내용이 없어요.'}));
+   pqs.forEach(q=>{
+     const d=document.createElement('div');d.className='card gold';
+     d.innerHTML='<span class="tag">'+typeLabel(q.type)+'</span>';
+     d.appendChild(Object.assign(document.createElement('div'),{className:'q',textContent:q.text}));
+     d.appendChild(Object.assign(document.createElement('div'),{className:'meta',textContent:(q.src?'📖 '+q.src+' · ':'')+q.author}));
+     const ok=document.createElement('button');ok.className='btn ok';ok.textContent='공개';
+     ok.onclick=()=>approveQuestion(q);
+     const no=document.createElement('button');no.className='btn no';no.textContent='삭제';
+     no.onclick=()=>deletePending('pending_questions',q.id);
+     d.append(ok,no);pending.appendChild(d);
+   });
+   pas.forEach(a=>{
+     const d=document.createElement('div');d.className='card gold';
+     d.appendChild(Object.assign(document.createElement('div'),{className:'meta',textContent:'💬 답변 · '+a.author}));
+     d.appendChild(Object.assign(document.createElement('div'),{className:'q',textContent:a.text}));
+     const ok=document.createElement('button');ok.className='btn ok';ok.textContent='공개';
+     ok.onclick=()=>approveAnswer(a);
+     const no=document.createElement('button');no.className='btn no';no.textContent='삭제';
+     no.onclick=()=>deletePending('pending_answers',a.id);
+     d.append(ok,no);pending.appendChild(d);
+   });
+   box.appendChild(pending);
+ }
+ const publicTitle=document.createElement('h3');publicTitle.textContent=teacher?'📌 공개된 질문':'📌 질문 모아보기';
+ box.appendChild(publicTitle);
+ buildFilters(qs);
+ const items=qs.filter(q=>(!ftype||q.type==ftype)&&(!fbook||key(q.src)==fbook));
+ if(!items.length){box.appendChild(Object.assign(document.createElement('div'),{className:'card',textContent:'아직 공개된 질문이 없어요. 첫 질문을 만들어 봐요!'}));return}
+ items.forEach(q=>{
+  const c=document.createElement('div');c.className='pit'+tc(q.type);c.onclick=()=>openQ(q.id);
+  const top=document.createElement('div');top.innerHTML='<span class="tag">'+typeLabel(q.type)+'</span>';
+  c.append(top,Object.assign(document.createElement('div'),{className:'pq',textContent:q.text}),
+    Object.assign(document.createElement('div'),{className:'meta',textContent:(q.src?'📖 '+q.src+' · ':'')+q.author}),
+    Object.assign(document.createElement('div'),{className:'meta',textContent:'💬 답변 '+as.filter(a=>a.question_id==q.id).length+'개'}));
+  if(teacher){const x=document.createElement('button');x.className='x';x.textContent='✕';x.onclick=e=>{e.stopPropagation();deleteQuestion(q.id)};c.appendChild(x)}
+  box.appendChild(c);
+ });
+}
+function openQ(id){
+ const q=qs.find(x=>x.id===id);if(!q)return;openId=id;
+ const sh=document.createElement('div');sh.className='sheet'+tc(q.type);
+ const close=document.createElement('button');close.className='btn no';close.textContent='✕ 닫기';close.onclick=closeQ;
+ sh.append(close,document.createTextNode(' '),Object.assign(document.createElement('span'),{className:'tag',textContent:typeLabel(q.type)}),
+   Object.assign(document.createElement('div'),{className:'q',textContent:q.text}),
+   Object.assign(document.createElement('div'),{className:'meta',textContent:(q.src?'📖 '+q.src+' · ':'')+q.author+' 님의 질문'}));
+ const ah=document.createElement('h3');ah.textContent='💬 답변';sh.appendChild(ah);
+ const ab=document.createElement('div');const list=as.filter(a=>a.question_id===id);
+ if(!list.length)ab.appendChild(Object.assign(document.createElement('div'),{className:'meta',textContent:'아직 답변이 없어요. 첫 답변을 써 줘요!'}));
+ list.forEach(a=>{const d=document.createElement('div');d.className='ans';d.textContent=a.text+' — '+a.author;ab.appendChild(d)});
+ sh.appendChild(ab);
+ const ta=document.createElement('textarea');ta.placeholder='내 생각으로 답해 봐요';
+ const b=document.createElement('button');b.className='btn';b.textContent='답변 올리기';b.onclick=async()=>{
+  const name=$('me').value.trim(),v=ta.value.trim();if(!name)return warn('이름을 먼저 써 주세요!');if(!v)return;
+  b.disabled=true;const {error}=await sb.from('pending_answers').insert({question_id:id,text:v,author:mask(name)});
+  if(error)warn('답변을 저장하지 못했어요.');else{ta.value='';b.textContent='✅ 선생님 확인 후 공개돼요';}
+  b.disabled=false;
+ };
+ sh.append(ta,b);$('sheetwrap').textContent='';$('sheetwrap').appendChild(sh);$('modal').classList.remove('hide');
+}
+function closeQ(){$('modal').classList.add('hide');$('sheetwrap').textContent='';openId=null}
+$('modal').onclick=e=>{if(e.target===$('modal'))closeQ()};
+
+async function teacherLogin(){
+ if(!sb)return alert('먼저 Supabase 설정을 해 주세요.');
+ const {data,error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('pw').value});
+ if(error){$('loginErr').textContent='이메일 또는 비밀번호를 확인하세요.';$('loginErr').classList.remove('hide');return}
+ $('login').classList.add('hide');teacher=true;$('teacherBtn').textContent='👩‍🏫 교사 모드 ON';$('logoutBtn').classList.remove('hide');await load();
+}
+$('teacherBtn').onclick=()=>{if(teacher){teacher=false;$('teacherBtn').textContent='👩‍🏫 교사 모드';$('logoutBtn').classList.add('hide');render()}else $('login').classList.remove('hide')};
+$('loginClose').onclick=()=>$('login').classList.add('hide');$('loginGo').onclick=teacherLogin;
+$('logoutBtn').onclick=async()=>{await sb.auth.signOut();teacher=false;$('logoutBtn').classList.add('hide');$('teacherBtn').textContent='👩‍🏫 교사 모드';render()};
+
+async function approveQuestion(q){
+ if(!teacher)return;
+ const {error}=await sb.from('questions').insert({id:q.id,text:q.text,src:q.src||'',type:q.type,author:q.author,created_at:q.created_at});
+ if(error){alert('공개하지 못했습니다.');console.error(error);return}
+ const d=await sb.from('pending_questions').delete().eq('id',q.id);
+ if(d.error)console.error(d.error);
+ await load();
+}
+async function approveAnswer(a){
+ if(!teacher)return;
+ const {error}=await sb.from('answers').insert({id:a.id,question_id:a.question_id,text:a.text,author:a.author,created_at:a.created_at});
+ if(error){alert('공개하지 못했습니다.');console.error(error);return}
+ const d=await sb.from('pending_answers').delete().eq('id',a.id);
+ if(d.error)console.error(d.error);
+ await load();
+}
+async function deletePending(table,id){
+ if(!teacher||!confirm('삭제할까요?'))return;
+ const {error}=await sb.from(table).delete().eq('id',id);
+ if(error)alert('삭제하지 못했습니다.');else await load();
+}
+
+async function deleteQuestion(id){if(!teacher||!confirm('이 질문을 삭제할까요?'))return;const {error}=await sb.from('questions').delete().eq('id',id);if(error)alert('삭제하지 못했습니다.');else await load()}
+async function capture(){window.print()}
+
+$('shot').onclick=capture;
+window.addEventListener('keydown',e=>{if(e.key==='Escape')closeQ()});
+if(sb)sb.channel('live').on('postgres_changes',{event:'*',schema:'public',table:'questions'},load).on('postgres_changes',{event:'*',schema:'public',table:'answers'},load).subscribe();
+load();
+</script>
+</body>
+</html>
